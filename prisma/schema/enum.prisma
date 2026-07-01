@@ -1,0 +1,93 @@
+enum UserRole {
+    SUPER_ADMIN
+    ADMIN
+    CUSTOMER
+}
+
+enum UserStatus {
+    ACTIVE
+    INACTIVE
+    BLOCKED
+    DELETED
+}
+
+enum InquiryStatus {
+    PENDING
+    REVIEWING
+    QUOTED
+    ACCEPTED
+    REJECTED
+    CLOSED
+}
+
+enum InquiryPriority {
+    LOW
+    MEDIUM
+    HIGH
+    URGENT
+}
+
+enum ProductStatus {
+    ACTIVE
+    INACTIVE
+    DRAFT
+}
+
+enum PageStatus {
+    PUBLISHED
+    DRAFT
+    ARCHIVED
+}
+
+enum OrderStatus {
+    PENDING
+    PAID
+    GERBER_REVIEW
+    ENGINEERING_REVIEW
+    PRODUCTION
+    QUALITY_CONTROL
+    PACKAGING
+    SHIPPED
+    DELIVERED
+    CANCELLED
+}
+
+enum OrderPriority {
+    LOW
+    MEDIUM
+    HIGH
+    URGENT
+}
+
+enum PaymentStatus {
+    PENDING
+    PAID
+    FAILED
+    REFUNDED
+}
+
+enum PaymentMethod {
+    STRIPE
+    PAYPAL
+    ALIPAY
+    WECHAT_PAY
+    BANK_TRANSFER
+}
+
+enum TicketStatus {
+    OPEN
+    IN_PROGRESS
+    CLOSED
+}
+
+enum OtpPurpose {
+    LOGIN_VERIFICATION
+    CHANGE_PASSWORD
+    RESET_PASSWORD
+    EMAIL_VERIFICATION
+}
+
+enum InquiryType {
+    GENERAL
+    PCB_QUOTE
+}

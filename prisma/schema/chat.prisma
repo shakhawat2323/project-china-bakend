@@ -1,0 +1,50 @@
+model ChatRoom {
+    id          String        @id @default(uuid())
+
+    customerId  String
+    customer    User          @relation("ChatCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+
+    adminId     String?
+    admin       User?         @relation("ChatAdmin", fields: [adminId], references: [id], onDelete: SetNull)
+
+    subject     String?
+    status      ChatRoomStatus @default(OPEN)
+    messages    ChatMessage[]
+
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+
+    @@index([customerId, status])
+    @@index([adminId, status])
+    @@map("chat_rooms")
+}
+
+model ChatMessage {
+    id          String      @id @default(uuid())
+
+    roomId      String
+    room        ChatRoom    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+    senderId    String
+    sender      User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+    message     String?
+    files       String[]    @default([])
+    isSeen      Boolean     @default(false)
+
+    seenById    String?
+    seenBy      User?       @relation("ChatMessageSeenBy", fields: [seenById], references: [id], onDelete: SetNull)
+    seenAt      DateTime?
+
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+
+    @@index([roomId, createdAt])
+    @@index([senderId])
+    @@map("chat_messages")
+}
+
+enum ChatRoomStatus {
+    OPEN
+    CLOSED
+}

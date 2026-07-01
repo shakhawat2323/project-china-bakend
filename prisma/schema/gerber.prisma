@@ -1,0 +1,26 @@
+model GerberFile {
+    id          String   @id @default(uuid())
+    userId      String
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
+    quoteId     String?
+    quote       Quote?   @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+    
+    fileName    String
+    fileUrl     String
+    fileSize    Int
+    
+    status      GerberStatus @default(UPLOADED)
+    
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@map("gerber_files")
+}
+
+enum GerberStatus {
+    UPLOADED
+    REVIEWING
+    APPROVED
+    REJECTED
+}

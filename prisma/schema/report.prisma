@@ -1,0 +1,19 @@
+model Report {
+  id        String   @id @default(uuid())
+  name      String
+  type      String
+  dateRange String
+  format    String
+  status    ReportStatus @default(COMPLETED)
+  fileUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reports")
+}
+
+enum ReportStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}

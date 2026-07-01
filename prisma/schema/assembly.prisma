@@ -1,0 +1,30 @@
+model AssemblyOrder {
+    id              String   @id @default(uuid())
+    userId          String
+    user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
+    quoteId         String?  // Linked to a PCB Quote
+    
+    name            String   @default("PCBA Project")
+    bomFileUrl      String   // Bill of Materials
+    pnpFileUrl      String?  // Pick and Place file
+    
+    assemblyType    String   @default("SMT") // SMT, THT, Mixed
+    sides           String   @default("Top") // Top, Bottom, Both
+    
+    status          AssemblyStatus @default(PENDING)
+    
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    @@map("assembly_orders")
+}
+
+enum AssemblyStatus {
+    PENDING
+    REVIEWING
+    QUOTED
+    ACCEPTED
+    IN_PRODUCTION
+    COMPLETED
+}

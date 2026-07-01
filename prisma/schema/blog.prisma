@@ -1,0 +1,18 @@
+model Blog {
+    id          String   @id @default(uuid())
+    title       String
+    slug        String   @unique
+    content     String
+    coverImage  String?
+    
+    authorId    String
+    author      User     @relation(fields: [authorId], references: [id])
+    
+    isPublished Boolean  @default(true)
+    
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([isPublished])
+    @@map("blogs")
+}

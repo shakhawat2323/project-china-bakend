@@ -1,0 +1,37 @@
+model Quote {
+    id              String   @id @default(uuid())
+    userId          String
+    user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
+    // Specifications
+    name            String   @default("Untitled PCB")
+    width           Float
+    height          Float
+    quantity        Int
+    layerCount      Int
+    materialType    String   // FR-4, Rogers, Aluminum
+    boardThickness  Float    // 1.6, 2.0
+    copperWeight    Float    // 1oz, 2oz
+    surfaceFinish   String   // HASL, ENIG
+    solderMaskColor String   // Green, Red, Blue
+    silkscreenColor String   // White, Black
+    
+    // Calculation
+    calculatedPrice Float
+    
+    status          QuoteStatus @default(PENDING)
+    
+    gerberFiles     GerberFile[]
+    orders          Order[]
+    
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    @@map("quotes")
+}
+
+enum QuoteStatus {
+    PENDING
+    SAVED
+    ORDERED
+}

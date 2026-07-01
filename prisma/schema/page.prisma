@@ -1,0 +1,22 @@
+model Page {
+    id              String     @id @default(uuid())
+    sectionSlug     String
+    pageSlug        String
+    title           String
+    content         String?
+    metaTitle       String?
+    metaDescription String?
+    specifications  Json?
+    faqs            Json?
+    images          String[]   @default([])
+    videos          String[]   @default([])
+    status          PageStatus @default(PUBLISHED)
+    order           Int        @default(0)
+
+    createdAt       DateTime   @default(now())
+    updatedAt       DateTime   @updatedAt
+
+    @@unique([sectionSlug, pageSlug])
+    @@index([status])
+    @@map("pages")
+}

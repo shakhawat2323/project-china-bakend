@@ -1,0 +1,14 @@
+model Coupon {
+    id                 String   @id @default(uuid())
+    code               String   @unique
+    discountPercentage Float
+    maxDiscount        Float?
+    validUntil         DateTime
+    isActive           Boolean  @default(true)
+    
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
+
+    @@index([code])
+    @@map("coupons")
+}

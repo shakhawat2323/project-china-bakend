@@ -1,0 +1,89 @@
+model User {
+    id                 String        @id @default(uuid())
+    email              String        @unique
+    password           String
+
+    role               UserRole      @default(CUSTOMER)
+    needPasswordChange Boolean       @default(false)
+    status             UserStatus    @default(ACTIVE)
+    isVerified         Boolean       @default(false)
+
+    name               String?
+    companyName        String?
+    phone              String?
+    address            String?
+    profilePhoto       String?
+
+    lastLoginAt        DateTime?
+    lastLoginIp        String?
+    lastActivityAt     DateTime?
+
+    createdAt          DateTime      @default(now())
+    updatedAt          DateTime      @updatedAt
+
+    admin              Admin?
+    inquiries          Inquiry[]
+    orders             Order[]
+    tickets            Ticket[]
+    ticketMessages     TicketMessage[]
+    notifications      Notification[]
+    reviews            Review[]
+    activityLogs       ActivityLog[]
+    blogs              Blog[]
+    passwordOtps       PasswordOtp[]
+    addresses          Address[]
+    quotes             Quote[]
+    gerberFiles        GerberFile[]
+    
+    cart               Cart?
+    wishlists          Wishlist[]
+    assemblyOrders     AssemblyOrder[]
+    affiliateProfile   AffiliateProfile?
+    accessRoles        UserAccessRole[]
+    chatRoomsAsCustomer ChatRoom[]      @relation("ChatCustomer")
+    chatRoomsAsAdmin    ChatRoom[]      @relation("ChatAdmin")
+    chatMessages        ChatMessage[]
+    seenChatMessages    ChatMessage[]   @relation("ChatMessageSeenBy")
+
+    @@map("users")
+}
+
+model Admin {
+    id            String   @id @default(uuid())
+    userId        String   @unique
+    user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    email         String   @unique
+    name          String
+    profilePhoto  String?
+    contactNumber String?
+    isDeleted     Boolean  @default(false)
+
+    assignedInquiries Inquiry[]
+
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    @@map("admins")
+}
+
+model PasswordOtp {
+    id                    String     @id @default(uuid())
+    userId                String
+    user                  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    otpHash               String
+    purpose               OtpPurpose
+    expiresAt             DateTime
+
+    pendingPasswordHash   String?
+    pendingAccessToken    String?
+    pendingRefreshToken   String?
+    redirectTo            String?
+
+    createdAt             DateTime   @default(now())
+    updatedAt             DateTime   @updatedAt
+
+    @@index([userId, purpose])
+    @@map("password_otps")
+}

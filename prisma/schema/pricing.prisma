@@ -1,0 +1,22 @@
+model PricingRule {
+    id          String   @id @default(uuid())
+    name        String   // e.g., "4 Layer Base Charge"
+    
+    // The attribute this rule targets (e.g., "layerCount", "material", "quantity")
+    targetField String   
+    
+    // The condition to trigger the rule (e.g., "4", "Rogers", ">1000")
+    condition   String   
+    
+    // Type of operation: "ADDITION" (+$20), "MULTIPLIER" (*1.5), "FIXED" ($50), "DISCOUNT_PERCENT" (-10%)
+    actionType  String   
+    
+    // The value to apply
+    actionValue Float    
+
+    isActive    Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@map("pricing_rules")
+}

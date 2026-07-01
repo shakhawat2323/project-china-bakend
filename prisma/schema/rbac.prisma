@@ -1,0 +1,35 @@
+model AccessRole {
+    id          String           @id @default(uuid())
+    name        String
+    slug        String           @unique
+    description String?
+    systemRole  UserRole?
+    permissions String[]         @default([])
+    isSystem    Boolean          @default(false)
+    isActive    Boolean          @default(true)
+
+    users       UserAccessRole[]
+
+    createdAt   DateTime         @default(now())
+    updatedAt   DateTime         @updatedAt
+
+    @@index([systemRole])
+    @@map("access_roles")
+}
+
+model UserAccessRole {
+    id        String     @id @default(uuid())
+    userId    String
+    user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    roleId    String
+    role      AccessRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+    assignedBy String?
+    createdAt DateTime   @default(now())
+
+    @@unique([userId, roleId])
+    @@index([userId])
+    @@index([roleId])
+    @@map("user_access_roles")
+}

@@ -1,0 +1,51 @@
+model Order {
+    id              String        @id @default(uuid())
+    
+    userId          String
+    user            User          @relation(fields: [userId], references: [id])
+    
+    inquiryId       String?
+    inquiry         Inquiry?      @relation(fields: [inquiryId], references: [id])
+    
+    quoteId         String?
+    quote           Quote?        @relation(fields: [quoteId], references: [id])
+    
+    orderItems      OrderItem[]
+    
+    totalAmount     Float
+    status          OrderStatus   @default(PENDING)
+    priority        OrderPriority @default(MEDIUM)
+    
+    shippingAddress String?
+    billingAddress  String?
+    
+    paymentStatus   PaymentStatus @default(PENDING)
+    
+    payments        Payment[]
+    
+    createdAt       DateTime      @default(now())
+    updatedAt       DateTime      @updatedAt
+
+    @@index([userId, status])
+    @@map("orders")
+}
+
+model OrderItem {
+    id              String        @id @default(uuid())
+    
+    orderId         String
+    order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    
+    productId       String
+    product         Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+    
+    quantity        Int
+    price           Float         // Price at the time of purchase
+    
+    createdAt       DateTime      @default(now())
+    updatedAt       DateTime      @updatedAt
+
+    @@index([orderId])
+    @@index([productId])
+    @@map("order_items")
+}

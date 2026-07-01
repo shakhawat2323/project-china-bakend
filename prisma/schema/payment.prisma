@@ -1,0 +1,26 @@
+model Payment {
+    id            String        @id @default(uuid())
+    
+    orderId       String
+    order         Order         @relation(fields: [orderId], references: [id])
+    
+    amount        Float
+    currency      String        @default("USD")
+    method        PaymentMethod
+    
+    transactionId String?       @unique
+    providerPaymentId String?
+    receiptUrl    String?
+    failureReason String?
+    rawResponse   Json?
+    status        PaymentStatus @default(PENDING)
+    paidAt        DateTime?
+    refundedAt    DateTime?
+    
+    createdAt     DateTime      @default(now())
+    updatedAt     DateTime      @updatedAt
+
+    @@index([orderId, status])
+    @@index([method, status])
+    @@map("payments")
+}

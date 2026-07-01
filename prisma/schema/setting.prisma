@@ -1,0 +1,14 @@
+model SystemSetting {
+    id          String   @id @default(uuid())
+    key         String   @unique
+    value       Json
+    group       String   @default("GENERAL") // GENERAL, PAYMENT, PRICING, SEO
+    
+    updatedBy   String?
+    
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([group])
+    @@map("system_settings")
+}

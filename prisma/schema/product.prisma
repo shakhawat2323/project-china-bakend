@@ -1,0 +1,46 @@
+model Product {
+    id              String        @id @default(uuid())
+    name            String
+    slug            String        @unique
+    category        String        @default("pcb")
+    description     String?
+    specifications  Json?
+    images          String[]      @default([])
+
+    minOrderQty     Int?
+    leadTimeDays    Int?
+    isFeatured      Boolean       @default(false)
+    tags            String[]
+    status          ProductStatus @default(DRAFT)
+
+    price           Float         @default(0.0)
+    stock           Int           @default(0)
+    rating          Float         @default(0.0)
+    reviewCount     Int           @default(0)
+
+    reviews         Review[]
+    cartItems       CartItem[]
+    wishlists       Wishlist[]
+    orderItems      OrderItem[]
+
+    createdAt       DateTime      @default(now())
+    updatedAt       DateTime      @updatedAt
+
+    @@index([category, status])
+    @@index([isFeatured])
+    @@map("products")
+}
+
+model ProductCategory {
+    id          String   @id @default(uuid())
+    name        String   @unique
+    slug        String   @unique
+    description String?
+    icon        String?
+    order       Int      @default(0)
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@map("product_categories")
+}

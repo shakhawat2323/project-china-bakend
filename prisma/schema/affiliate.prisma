@@ -1,0 +1,46 @@
+model AffiliateProfile {
+    id            String   @id @default(uuid())
+    userId        String   @unique
+    user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    
+    referralCode  String   @unique
+    totalEarnings Float    @default(0)
+    pendingPayout Float    @default(0)
+    
+    earnings      AffiliateEarning[]
+    
+    status        AffiliateStatus @default(ACTIVE)
+    
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    @@map("affiliate_profiles")
+}
+
+model AffiliateEarning {
+    id            String   @id @default(uuid())
+    profileId     String
+    profile       AffiliateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+    
+    amount        Float
+    orderId       String?  // The order that generated this commission
+    
+    status        EarningStatus @default(PENDING)
+    
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    @@map("affiliate_earnings")
+}
+
+enum AffiliateStatus {
+    PENDING
+    ACTIVE
+    SUSPENDED
+}
+
+enum EarningStatus {
+    PENDING
+    AVAILABLE
+    PAID
+}
