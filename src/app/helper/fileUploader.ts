@@ -32,8 +32,21 @@ const upload = multer({
     limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
 });
 
-// Upload to Cloudinary
+const hasCloudinaryConfig = Boolean(
+    config.cloudinary.cloud_name && config.cloudinary.api_key && config.cloudinary.api_secret,
+);
+
+const getLocalUploadUrl = (filePath: string) => `/uploads/${path.basename(filePath)}`;
+
+// Upload to Cloudinary. In local/dev without Cloudinary env, keep the file in /uploads.
 const uploadToCloudinary = async (filePath: string, folder: string = "china-project") => {
+    if (!hasCloudinaryConfig) {
+        return {
+            url: getLocalUploadUrl(filePath),
+            publicId: `local/${path.basename(filePath)}`,
+        };
+    }
+
     const result = await cloudinary.uploader.upload(filePath, {
         folder,
         resource_type: "auto",
@@ -50,6 +63,12 @@ const uploadToCloudinary = async (filePath: string, folder: string = "china-proj
 
 // Delete from Cloudinary
 const deleteFromCloudinary = async (publicId: string) => {
+    if (publicId.startsWith("local/")) {
+        const localPath = path.join(uploadsDir, path.basename(publicId));
+        if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+        return;
+    }
+
     await cloudinary.uploader.destroy(publicId);
 };
 

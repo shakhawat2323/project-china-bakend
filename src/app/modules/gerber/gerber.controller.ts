@@ -18,14 +18,26 @@ const getActor = (req: AuthRequest) => ({
     role: req.user?.role || "CUSTOMER",
 });
 
+const getUploadedFiles = (req: AuthRequest) => (Array.isArray(req.files) ? req.files : Object.values(req.files || {}).flat());
+
 const uploadFiles = catchAsync(async (req: AuthRequest, res: Response) => {
-    const uploadedFiles = Array.isArray(req.files) ? req.files : Object.values(req.files || {}).flat();
-    const result = await GerberService.uploadFiles(getActor(req), uploadedFiles, req.body.quoteId);
+    const result = await GerberService.uploadFiles(getActor(req), getUploadedFiles(req), req.body.quoteId);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
         message: "Files uploaded successfully.",
+        data: result,
+    });
+});
+
+const uploadPublicInquiry = catchAsync(async (req: AuthRequest, res: Response) => {
+    const result = await GerberService.uploadPublicInquiry(getUploadedFiles(req), req.body);
+
+    sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: "Gerber/BOM files uploaded successfully. Our engineering team will review them shortly.",
         data: result,
     });
 });
@@ -87,6 +99,7 @@ const deleteOwnFile = catchAsync(async (req: AuthRequest, res: Response) => {
 
 export const GerberController = {
     uploadFiles,
+    uploadPublicInquiry,
     getMyFiles,
     getAllFiles,
     getFileById,

@@ -1,31 +1,57 @@
-import { GerberStatus, UserRole } from "@prisma/client";
+import { GerberStatus, InquiryPriority, InquiryType, UserRole } from "@prisma/client";
 import httpStatus from "http-status";
 import path from "path";
 import ApiError from "../../errors/ApiError";
 import { fileUploader } from "../../helper/fileUploader";
 import { prisma } from "../../shared/prisma";
 import { NotificationService } from "../notification/notification.service";
+import { sendInquiryNotification } from "../../helper/emailSender";
 
 type Actor = {
     id: string;
     role: UserRole;
 };
 
-const allowedExtensions = [".zip", ".rar", ".7z", ".csv", ".xlsx", ".xls", ".txt"];
+type PublicUploadPayload = {
+    fullName?: string;
+    email?: string;
+    companyName?: string;
+    phone?: string;
+    boardType?: string;
+    description?: string;
+};
+
+const allowedExtensions = [".zip", ".rar", ".7z", ".csv", ".xlsx", ".xls", ".txt", ".pdf"];
 
 const assertAllowedFile = (file: Express.Multer.File) => {
     const extension = path.extname(file.originalname).toLowerCase();
 
     if (!allowedExtensions.includes(extension)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Only Gerber ZIP/RAR/7Z, BOM CSV/XLSX/XLS/TXT files are allowed.");
+        throw new ApiError(httpStatus.BAD_REQUEST, "Only Gerber ZIP/RAR/7Z, BOM CSV/XLSX/XLS/TXT/PDF files are allowed.");
     }
 };
 
-const uploadFiles = async (actor: Actor, files: Express.Multer.File[], quoteId?: string) => {
+const uploadGerberAssets = async (files: Express.Multer.File[]) => {
     if (!files?.length) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "At least one file is required.");
+        return [];
     }
 
+    const uploadedFiles = [];
+
+    for (const file of files) {
+        assertAllowedFile(file);
+        const uploaded = await fileUploader.uploadToCloudinary(file.path, "gerber-files");
+        uploadedFiles.push({
+            fileName: file.originalname,
+            fileUrl: uploaded.url,
+            fileSize: file.size,
+        });
+    }
+
+    return uploadedFiles;
+};
+
+const uploadFiles = async (actor: Actor, files: Express.Multer.File[], quoteId?: string) => {
     if (quoteId) {
         const quote = await prisma.quote.findUnique({ where: { id: quoteId } });
         if (!quote) {
@@ -36,19 +62,18 @@ const uploadFiles = async (actor: Actor, files: Express.Multer.File[], quoteId?:
         }
     }
 
+    const uploadedFiles = await uploadGerberAssets(files);
     const records = [];
 
-    for (const file of files) {
-        assertAllowedFile(file);
-        const uploaded = await fileUploader.uploadToCloudinary(file.path, "gerber-files");
+    for (const file of uploadedFiles) {
         records.push(
             await prisma.gerberFile.create({
                 data: {
                     userId: actor.id,
                     quoteId,
-                    fileName: file.originalname,
-                    fileUrl: uploaded.url,
-                    fileSize: file.size,
+                    fileName: file.fileName,
+                    fileUrl: file.fileUrl,
+                    fileSize: file.fileSize,
                     status: GerberStatus.UPLOADED,
                 },
             }),
@@ -64,6 +89,48 @@ const uploadFiles = async (actor: Actor, files: Express.Multer.File[], quoteId?:
     });
 
     return records;
+};
+
+const uploadPublicInquiry = async (files: Express.Multer.File[], payload: PublicUploadPayload) => {
+    const uploadedFiles = await uploadGerberAssets(files);
+    const fileNames = uploadedFiles.map((file) => `${file.fileName} (${Math.round(file.fileSize / 1024)} KB)`).join(", ");
+    const description = [
+        payload.description?.trim(),
+        `Uploaded files: ${fileNames}`,
+        "Source: Website instant quote upload",
+    ]
+        .filter(Boolean)
+        .join("\n");
+
+    const inquiry = await prisma.inquiry.create({
+        data: {
+            inquiryType: InquiryType.PCB_QUOTE,
+            priority: InquiryPriority.HIGH,
+            fullName: payload.fullName?.trim() || "Website Gerber Upload",
+            email: payload.email?.trim() || "ft-osr@feitianpcb.com",
+            companyName: payload.companyName?.trim() || undefined,
+            phone: payload.phone?.trim() || undefined,
+            boardType: payload.boardType?.trim() || "Gerber / BOM Upload",
+            description,
+            fileUrls: uploadedFiles.map((file) => file.fileUrl),
+        },
+    });
+
+    try {
+        await sendInquiryNotification({
+            fullName: inquiry.fullName,
+            email: inquiry.email,
+            companyName: inquiry.companyName || undefined,
+            description: inquiry.description,
+        });
+    } catch (error) {
+        console.error("Failed to send inquiry email notification:", error);
+    }
+
+    return {
+        inquiry,
+        files: uploadedFiles,
+    };
 };
 
 const getMyFiles = async (userId: string) => {
@@ -144,6 +211,7 @@ const deleteOwnFile = async (gerberId: string, userId: string) => {
 
 export const GerberService = {
     uploadFiles,
+    uploadPublicInquiry,
     getMyFiles,
     getAllFiles,
     getFileById,

@@ -11,6 +11,12 @@ import { GerberValidation } from "./gerber.validation";
 const router = express.Router();
 
 router.post(
+    "/public-upload",
+    fileUploader.upload.array("files", 10),
+    GerberController.uploadPublicInquiry,
+);
+
+router.post(
     "/upload",
     auth(UserRole.CUSTOMER, UserRole.ADMIN, UserRole.SUPER_ADMIN),
     requirePermission(permissions.gerber.upload),
