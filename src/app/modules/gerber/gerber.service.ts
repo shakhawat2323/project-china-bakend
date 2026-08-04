@@ -121,7 +121,7 @@ const uploadPublicInquiry = async (files: Express.Multer.File[], payload: Public
             fullName: inquiry.fullName,
             email: inquiry.email,
             companyName: inquiry.companyName || undefined,
-            description: inquiry.description,
+            description: inquiry.description || "",
         });
     } catch (error) {
         console.error("Failed to send inquiry email notification:", error);
