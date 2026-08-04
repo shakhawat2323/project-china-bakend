@@ -18,8 +18,8 @@ echo "🔧 Generating Prisma Client..."
 pnpm prisma generate || npx prisma generate
 
 if [ -n "${DATABASE_URL:-}" ]; then
-	echo "🗄️ Running database migrations (DATABASE_URL detected)..."
-	pnpm prisma migrate deploy || npx prisma migrate deploy
+	echo "🗄️ Running database sync (DATABASE_URL detected)..."
+	pnpm prisma db push --accept-data-loss || npx prisma db push --accept-data-loss
 else
 	echo "⚠️ DATABASE_URL not set — skipping prisma migrations"
 fi
