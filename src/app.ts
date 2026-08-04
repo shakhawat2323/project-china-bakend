@@ -14,7 +14,7 @@ import rateLimiter from "./app/middlewares/rateLimiter";
 const app: Application = express();
 
 // Middlewares
-const allowedOrigins = [config.frontend_url, "http://localhost:3000"].filter(Boolean);
+const allowedOrigins = [config.frontend_url, "http://localhost:3000", "https://wupingfeitian.vercel.app"].filter(Boolean);
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {

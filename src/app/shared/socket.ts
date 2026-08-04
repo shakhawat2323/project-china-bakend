@@ -23,7 +23,7 @@ class SocketManager {
     private onlineUsers: Map<string, Set<string>> = new Map();
 
     public init(server: HttpServer) {
-        const allowedOrigins = [config.frontend_url, "http://localhost:3000"].filter(Boolean);
+        const allowedOrigins = [config.frontend_url, "http://localhost:3000", "https://wupingfeitian.vercel.app"].filter(Boolean);
 
         this.io = new SocketIOServer(server, {
             cors: {
