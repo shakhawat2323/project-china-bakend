@@ -3,6 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import config from "../../config";
 import path from "path";
 import fs from "fs";
+import os from "os";
 
 // Cloudinary config
 cloudinary.config({
@@ -12,9 +13,18 @@ cloudinary.config({
 });
 
 // Multer storage for local uploads
-const uploadsDir = path.join(process.cwd(), "uploads");
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+let uploadsDir = path.join(process.cwd(), "uploads");
+
+try {
+    if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+} catch (error) {
+    // If it fails (e.g., read-only filesystem on Vercel), fallback to /tmp
+    uploadsDir = path.join(os.tmpdir(), "uploads");
+    if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+    }
 }
 
 const storage = multer.diskStorage({
