@@ -82,33 +82,11 @@ const register = async (payload: {
             phone: payload.phone,
             address: payload.address,
             role: "CUSTOMER",
-            isVerified: false,
+            isVerified: true,
         },
     });
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const hashedOtp = await bcrypt.hash(otp, Number(config.salt_round));
 
-    await prisma.passwordOtp.create({
-        data: {
-            userId: user.id,
-            otpHash: hashedOtp,
-            purpose: "EMAIL_VERIFICATION",
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes expiry
-        },
-    });
-
-    await sendEmail(
-        user.email,
-        "Verify Your Email - SysPCB",
-        `
-        <h2>Email Verification</h2>
-        <p>Hello ${user.name || "User"},</p>
-        <p>Thank you for registering. Please use the following OTP to verify your email address:</p>
-        <h3 style="background:#f4f4f4;padding:10px;display:inline-block;letter-spacing:2px;">${otp}</h3>
-        <p>This OTP is valid for 10 minutes.</p>
-        `
-    );
 
     const { password: _, ...userWithoutPassword } = user;
 

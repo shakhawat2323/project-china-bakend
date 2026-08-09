@@ -1,9 +1,9 @@
-import { prisma } from "./src/shared/prisma";
+import { prisma } from "./src/app/shared/prisma";
 
 async function main() {
     console.log("Verifying users...");
     const updated = await prisma.user.updateMany({
-        where: { email: "lasiyo9436@fixscal.com" },
+        where: { email: "testuser_12345@example.com" },
         data: { isVerified: true }
     });
     console.log(`Updated ${updated.count} users.`);
